@@ -128,18 +128,19 @@ while True:
                        print(Fore.GREEN + now.strftime("%Y-%m-%d %H:%M:%S"))
                        break
                    else: 
+                       print (Fore.RED)
                        store = ("Denied Personnel")
+                        GPIO.output(PULLPUSHSOLENOID_PIN_SIG , False)
+                        GPIO.output(LEDG_PIN_VIN , False)
+                        GPIO.output(LEDR_PIN_VIN , True)
+                        print ("Door is LOCK")
+                        print(Style.RESET_ALL)
+                        
         finally:
-            print (Fore.RED)
-            if store == ("Denied Personnel"):
-                GPIO.output(PULLPUSHSOLENOID_PIN_SIG , False)
-                GPIO.output(LEDG_PIN_VIN , False)
-                GPIO.output(LEDR_PIN_VIN , True)
-                print ("Door is LOCK")
+             if store == ("Denied Personnel"):
                 print store
                 file.close()
-                print(Style.RESET_ALL)
-    time.sleep(TIME_wait)
+        time.sleep(TIME_wait)
    # end if
     clf.close()
 
