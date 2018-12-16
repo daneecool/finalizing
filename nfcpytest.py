@@ -76,7 +76,6 @@ print('...waiting for card...')
 acceptedIds = ["010102122b128d28", "010108016e181013"]
 #file = ["/home/pi/Desktop/nfcpy/add on codex/idm.txt"]
 
-
 while True:
     # Connected to NFC reader connected to USB and instantiated
     clf = nfc.ContactlessFrontend('usb')
@@ -93,61 +92,48 @@ while True:
 
         #Extract IDm
         idm = binascii.hexlify(tag.idm)
-        file = open("idm.txt" , "r")
+       # file = open("idm.txt" , "r")
+        id_file = open("idm.txt" , "r")
+        
       #  print(file.read())
           #  print("idm is" + idm)
           #  print("id is" + id)
         store = ""
         try:
-           input_state = GPIO.input(PUSHBUTTON_PIN)
-           with open("idm.txt", "r") as file:
-               for line in file:
-                   if (idm == line):
-                       store = ("Authorised Personnel")
-                       print(Fore.MAGENTA + "Authorised Personnel")
-                       # call in the all the functions #
-                       input_state = GPIO.input(PUSHBUTTON_PIN)
-                       if (input_state == False):
-                          aldOpen = isOpen
-                          isOpen = GPIO.input(MAGNETICDOORSWITCH3V3_PIN_SIG)
-                          if (isOpen and (isOpen != aldOpen)):
-                            GPIO.output(PULLPUSHSOLENOID_PIN_SIG , False)
-                            GPIO.output(LEDG_PIN_VIN , False)
-                            GPIO.output(LEDR_PIN_VIN , True)
-                            print ("Door is LOCK")
-                          elif (isOpen != aldOpen):
-                            GPIO.output(PULLPUSHSOLENOID_PIN_SIG , True)
-                            GPIO.output(LEDR_PIN_VIN , False)
-                            GPIO.output(LEDG_PIN_VIN , True)
-                            print ("Door is UNLOCK")
-                       elif (input_state == True):
-                          print("Push button is pressed!, door unlcok")
-                          GPIO.output(PULLPUSHSOLENOID_PIN_SIG , True)
-                          GPIO.output(LEDG_PIN_VIN , True)
-                          GPIO.output(LEDR_PIN_VIN , False)
-                       time.sleep(3)
-                       if (idm == "010102122b128d28"):
-                           print ("Daniel")
-                       elif (idm == "010108016e181013"):
-                           print ("Edwin")
-                       now = datetime.datetime.now()
-                       print(Fore.GREEN + now.strftime("%Y-%m-%d %H:%M:%S"))
-                       break
-                   else:
-                       store = ("Denied Personnel") 
-       # except Expection as ValueError:
-          #  print ("Access Denied")
+            # Read the file
+            with id_file as file:
+            # This will create an array with all the id's
+                id_list = file.read().splitlines()
+               # print id_list
+                
+            # This is to find a match in the array
+            if (idm in id_list):
+                print(Fore.MAGENTA + "Authorised Personnel")
+                GPIO.output(PULLPUSHSOLENOID_PIN_SIG , True)
+                GPIO.output(LEDR_PIN_VIN , False)
+                GPIO.output(LEDG_PIN_VIN , True)
+                print ("Door is UNLOCK")
+                now = datetime.datetime.now()
+                print(Fore.GREEN + now.strftime("%Y-%m-%d %H:%M:%S"))
+
+            # Additional message
+                if (idm == "010102122b128d28"):
+                    print ("Daniel")
+                elif (idm == "010108016e181013"):
+                    print ("Edwin")
+
+            else:
+                print(Fore.MAGENTA + "Denied Personnel")
+                GPIO.output(PULLPUSHSOLENOID_PIN_SIG , False)
+                GPIO.output(LEDG_PIN_VIN , False)
+                GPIO.output(LEDR_PIN_VIN , True)
+                print ("Door is LOCK")
+    
         finally:
-           # now = datetime.datetime.now()
-           # print(Fore.GREEN)
-           # print (now.strftime("%Y-%m-%d %H:%M:%S"))
-            print (Fore.RED)
-            if store == ("Denied Personnel"):
-             print store
             file.close()
             print(Style.RESET_ALL)
-    time.sleep(TIME_wait)
-    #end if
+            time.sleep(TIME_wait)
+        #end if
 
     clf.close()
 
